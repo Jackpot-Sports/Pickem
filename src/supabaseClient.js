@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { LogBox } from "react-native";
 import "react-native-url-polyfill/auto";
 
 const supabaseUrl = "https://aohggynmsqurtpszrgin.supabase.co";
@@ -26,7 +27,6 @@ export async function fetchRivals(userId) {
 }
 
 export async function getCurrentUserId() {
-  return "644ca2a0-6fe6-4792-a1d6-11ce3b9de8db"
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
     
@@ -35,36 +35,20 @@ export async function getCurrentUserId() {
       return null;
     }
 
-    return user ? user.id : null;
+
+    const { data } = await supabase
+      .from('users')
+      .select('*') // Adjust to select specific columns if needed
+      .eq('uid', user.id) // Ensure 'uid' matches the column name in your table
+      .single(); 
+
+    return data
   } catch (error) {
     console.error('Unexpected error in getCurrentUserId:', error);
     return null;
   }
 }
 
-
-export async function getOwnedPlayers(ownerId) {
-  let { data: bankData, error: bankError } = await supabase
-    .from("bank")
-    .select("sourcePlayer")
-    .eq("owner", ownerId);
-  if (bankError) {
-    console.error(bankError);
-    return;
-  }
-  const sourcePlayerIds = bankData.map((item) => item.sourcePlayer);
-  let { data: playerData, error: playerError } = await supabase
-    .from("NFLplayers")
-    .select("*")
-    .in("PID", sourcePlayerIds);
-
-  if (playerError) {
-    console.error(playerError);
-    return;
-  }
-
-  return playerData;
-}
 export async function getUsers() {
   try {
     const { data, error } = await supabase
@@ -98,6 +82,34 @@ export async function fetchRandomPicks() {
       .from("bet_pool")
       .select("id, home_team, away_team")
       .order("id", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching picks:", error.message);
+      return []; // Return an empty array or handle the error as needed
+    } else {
+      const shuffledPicks = shuffleArray(data || []);
+      const randomPicks = shuffledPicks.slice(0, 3); // Select the first 3 picks
+      return randomPicks; // Return the shuffled and sliced picks array
+    }
+  } catch (error) {
+    console.error("Error:", error.message);
+    return []; // Return an empty array or handle the error as needed
+  }
+}
+
+export async function fetchRandomProps() {
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+
+  try {
+    const { data, error } = await supabase
+      .from("prop_bets")
+      .select("key, description, point,uid");
 
     if (error) {
       console.error("Error fetching picks:", error.message);
@@ -169,5 +181,5 @@ export async function getActivePlayerGames() {
   }
 }
 
-console.log("supabase client initialized client:", supabase);
+// console.log("supabase client initialized client:", supabase);
 export default supabase;

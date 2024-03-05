@@ -19,10 +19,5 @@ export default function Auth() {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  if (!session) {
-    return <Login />;
-  } else {
-    return <RivalsNav></RivalsNav>;
-  }
+  return <RivalsNav></RivalsNav>
 }

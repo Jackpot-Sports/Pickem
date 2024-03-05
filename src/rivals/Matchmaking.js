@@ -1,32 +1,43 @@
 import React, { useState , useEffect } from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { getCurrentUserId } from "../supabaseClient";
+import supabase from "../supabaseClient";
 
 const Matchmaking = ({ route }) => {
   const { game_id } = route.params;
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  
   const goToLogin = () => {
     navigation.navigate("Login");
   };
 
-  const goToFirstQueue = () => {
-    console.log("Navigating to First Queue...");
-  };
-
-  const goToHistoryScreen = () => {
-    navigation.navigate('Live', { phone: '1234567890' });
+  const goToLiveScreen = () => {
+    navigation.navigate('Live', { phone: '6788962515' });
   };
   const goToGamesListScreen = () => {
     navigation.navigate("GamesList");
   };
-  const goToLiveScreen = () => {
-    navigation.navigate("Live");
+  const goToHistoryScreen = () => {
+    navigation.navigate("History");
   };
   const openModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const { data, error } = supabase.auth.getSession();
+    setIsLoggedIn(!data);
+    const { data2: listener } = supabase.auth.onAuthStateChange((_event, data) => {
+      setIsLoggedIn(!!data);
+    });
+
+    return () => {
+      // listener.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     if (game_id != null) {
@@ -49,10 +60,11 @@ const Matchmaking = ({ route }) => {
           {/* <Text style={styles.subText}>12/20 Games Remaining this Week</Text> */}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={goToLogin} style={styles.button}>
-          <Text style={styles.titleText}>Log in</Text>
-          {/* <Text style={styles.subText}>1 v 1 Rival Matches </Text> */}
-        </TouchableOpacity>
+        {!isLoggedIn && (
+          <TouchableOpacity onPress={goToLogin} style={styles.button}>
+            <Text style={styles.titleText}>Log in</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity onPress={goToLiveScreen} style={styles.button}>
           <Text style={styles.titleText}>Play</Text>

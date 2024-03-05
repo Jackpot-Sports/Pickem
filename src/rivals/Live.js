@@ -18,54 +18,30 @@ const supabase = createClient(
   "https://aohggynmsqurtpszrgin.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvaGdneW5tc3F1cnRwc3pyZ2luIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTM1MDMyMzUsImV4cCI6MjAwOTA3OTIzNX0.wj2GWnQ6vsoph6Vs17GgLuBuuMt2tctCN9r1kIUCST4"
 );
+import { fetchRandomProps } from "../supabaseClient";
 
 const Live =  () => {
   const navigation = useNavigation();
   const [picks, setPicks] = useState([]);
   // const [choice, setChoice] = useState([]);
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("6788962515");
   const [phoneNumberValidated, setPhoneNumberValidated] = useState(false);
   const [gameId, setGameId] = useState("");
   useEffect(() => {
-    const fetchRandomPicks = async () => {
-      try {
-        // Fetch 3 random rows from the bet_pool table
-        const { data, error } = await supabase
-          .from("bet_pool")
-          .select("id, home_team, away_team")
-          .order("id", { ascending: false });
-        // .range(0, 2); // Change the range to match the number of picks you want
-
-        if (error) {
-          console.error("Error fetching picks:", error.message);
-        } else {
-          const shuffledPicks = shuffleArray(data);
-
-          // Select the first 3 picks (or fewer if there are fewer than 3)
-          const randomPicks = shuffledPicks.slice(0, 3);
-
-          setPicks(randomPicks);
-        }
-      } catch (error) {
-        console.error("Error:", error.message);
-      }
+    const fetchProps = async () => {
+      const user = await fetchRandomProps(); // Assuming this returns an ID or null
+      // Assuming there's another function or logic here to fetch user details by userId
+      setPicks(user);
     };
 
-    const shuffleArray = (array) => {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    };
-    fetchRandomPicks();
+    fetchProps();
   }, []);
   const validatePhoneNumber = (number) => {
     // Example: Validate based on length and/or a regex pattern
     return number.trim().length === 10; // Basic validation for example
   };
   const handleResult = async (result, choice) => {
-    const pickIndex = picks.findIndex((pick) => pick.id === choice);
+    const pickIndex = picks.findIndex((pick) => pick.uid === choice);
     
     // Package choice and result into a JSON array
     const resultData = {
@@ -81,7 +57,7 @@ const Live =  () => {
       updatedPicks.splice(pickIndex, 1);
       // Log the updated picks data and the resultData array
     } else {
-      console.error(`Item with id ${id} not found in picks data.`);
+      console.error(`Item with id ${uid} not found in picks data.`);
     }
     // if session
     console.log("ASDSAd")
@@ -107,7 +83,7 @@ const Live =  () => {
     if (validatePhoneNumber(phoneNumber)) {
       // If phone number is valid, update state and potentially perform other actions
       setPhoneNumberValidated(true);
-      Alert.alert("Success", "Phone number accepted.");
+      // Alert.alert("Success", "Phone number accepted.");
     } else {
       // If validation fails, keep the input visible and inform the user
       Alert.alert("Error", "Please enter a valid phone number.");
@@ -149,16 +125,16 @@ const Live =  () => {
   return (
     <View style={styles.container}>
       <View>
-        {picks.map((pick) => (
+        {/* {picks.map((pick) => (
           <Card key={pick.id} style={styles.commonCard}>
             <Card.Content>
               <Title style={styles.titleText}>
                 {pick.home_team} vs {pick.away_team}
               </Title>
-              {/* Additional details */}
+              
               <Paragraph>Additional details...</Paragraph>
 
-              {/* Buttons for Win and Lose */}
+             
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   style={[styles.button, styles.winButton]}
@@ -176,7 +152,58 @@ const Live =  () => {
               </View>
             </Card.Content>
           </Card>
-        ))}
+        ))} */}
+        {picks.map((pick) => (
+  <Card key={pick.uid} style={styles.commonCard}>
+    <Card.Content>
+      <Title style={styles.titleText}>
+        {pick.description}
+      </Title>
+      {/* Additional details */}
+      <Paragraph> {pick.key} {pick.point}</Paragraph>
+
+      {/* Conditional Buttons based on whether `pick.point` has a value */}
+      <View style={styles.buttonContainer}>
+        {pick.point ? (
+          // Render Over/Under buttons if there is a point value
+          <>
+            <TouchableOpacity
+              style={[styles.button, styles.winButton]}
+              onPress={() => handleResult("Over", pick.uid)}
+            >
+              <Title style={styles.buttonText}>Over</Title>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button, styles.loseButton]}
+              onPress={() => handleResult("Under", pick.uid)}
+            >
+              <Title style={styles.buttonText}>Under</Title>
+            </TouchableOpacity>
+          </>
+        ) : (
+          // Render Yes/No buttons if there is no point value
+          <>
+            <TouchableOpacity
+              style={[styles.button, styles.winButton]} // Consider changing the style if you want different colors for Yes/No
+              onPress={() => handleResult("Yes", pick.uid)}
+            >
+              <Title style={styles.buttonText}>Yes</Title>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button, styles.loseButton]} // Consider changing the style if you want different colors for Yes/No
+              onPress={() => handleResult("No", pick.uid)}
+            >
+              <Title style={styles.buttonText}>No</Title>
+            </TouchableOpacity>
+          </>
+        )} 
+      </View>
+    </Card.Content>
+  </Card>
+))}
+
       </View>
       
     </View>
