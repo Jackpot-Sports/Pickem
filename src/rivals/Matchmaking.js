@@ -51,7 +51,7 @@ const Matchmaking = ({ route }) => {
   return (
     <View style={styles.container}>
       <Text style={[styles.titleText, { color: "#fff" }]}>Pitch</Text>
-      <Text style={[styles.titleText, { color: "#fff" }]}>
+      <Text style={[styles.subText, { color: "#fff" }]}>
         Pick DFS props against your friends
       </Text>
       <View style={styles.row}>

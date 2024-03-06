@@ -124,85 +124,57 @@ const Live =  () => {
   } else {
   return (
     <View style={styles.container}>
-      <View>
-        {/* {picks.map((pick) => (
-          <Card key={pick.id} style={styles.commonCard}>
+      <View style={{marginTop: 50}}>
+        {picks.map((pick) => (
+          <Card key={pick.uid} style={styles.commonCard}>
             <Card.Content>
               <Title style={styles.titleText}>
-                {pick.home_team} vs {pick.away_team}
-              </Title>
-              
-              <Paragraph>Additional details...</Paragraph>
+                {pick.description}
+              </Title >
+              {/* Additional details */}
+              <Paragraph style={styles.subText}> {pick.key} {pick.point}</Paragraph>
 
-             
+              {/* Conditional Buttons based on whether `pick.point` has a value */}
               <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={[styles.button, styles.winButton]}
-                  onPress={() => handleResult("Win", pick.id)}
-                >
-                  <Title style={styles.buttonText}>Win</Title>
-                </TouchableOpacity>
+                {pick.point ? (
+                  // Render Over/Under buttons if there is a point value
+                  <>
+                    <TouchableOpacity
+                      style={[styles.button, styles.winButton]}
+                      onPress={() => handleResult("Over", pick.uid)}
+                    >
+                      <Title style={styles.buttonText}>Over</Title>
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[styles.button, styles.loseButton]}
-                  onPress={() => handleResult("Lose", pick.id)}
-                >
-                  <Title style={styles.buttonText}>Lose</Title>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.button, styles.loseButton]}
+                      onPress={() => handleResult("Under", pick.uid)}
+                    >
+                      <Title style={styles.buttonText}>Under</Title>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  // Render Yes/No buttons if there is no point value
+                  <>
+                    <TouchableOpacity
+                      style={[styles.button, styles.winButton]} // Consider changing the style if you want different colors for Yes/No
+                      onPress={() => handleResult("Yes", pick.uid)}
+                    >
+                      <Title style={styles.buttonText}>Yes</Title>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[styles.button, styles.loseButton]} // Consider changing the style if you want different colors for Yes/No
+                      onPress={() => handleResult("No", pick.uid)}
+                    >
+                      <Title style={styles.buttonText}>No</Title>
+                    </TouchableOpacity>
+                  </>
+                )} 
               </View>
             </Card.Content>
           </Card>
-        ))} */}
-        {picks.map((pick) => (
-  <Card key={pick.uid} style={styles.commonCard}>
-    <Card.Content>
-      <Title style={styles.titleText}>
-        {pick.description}
-      </Title>
-      {/* Additional details */}
-      <Paragraph> {pick.key} {pick.point}</Paragraph>
-
-      {/* Conditional Buttons based on whether `pick.point` has a value */}
-      <View style={styles.buttonContainer}>
-        {pick.point ? (
-          // Render Over/Under buttons if there is a point value
-          <>
-            <TouchableOpacity
-              style={[styles.button, styles.winButton]}
-              onPress={() => handleResult("Over", pick.uid)}
-            >
-              <Title style={styles.buttonText}>Over</Title>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.button, styles.loseButton]}
-              onPress={() => handleResult("Under", pick.uid)}
-            >
-              <Title style={styles.buttonText}>Under</Title>
-            </TouchableOpacity>
-          </>
-        ) : (
-          // Render Yes/No buttons if there is no point value
-          <>
-            <TouchableOpacity
-              style={[styles.button, styles.winButton]} // Consider changing the style if you want different colors for Yes/No
-              onPress={() => handleResult("Yes", pick.uid)}
-            >
-              <Title style={styles.buttonText}>Yes</Title>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.button, styles.loseButton]} // Consider changing the style if you want different colors for Yes/No
-              onPress={() => handleResult("No", pick.uid)}
-            >
-              <Title style={styles.buttonText}>No</Title>
-            </TouchableOpacity>
-          </>
-        )} 
-      </View>
-    </Card.Content>
-  </Card>
-))}
+        ))}
 
       </View>
       
@@ -222,19 +194,19 @@ const styles = StyleSheet.create({
   commonCard: {
     borderRadius: 14,
     borderWidth: 1,
-    marginTop: 10,
-    padding: 10,
+    padding: 5,
     marginBottom: 10,
     flexDirection: "column",
+    backgroundColor: "#212121"
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginTop: 10,
+    marginTop: 5,
   },
   button: {
     borderRadius: 8,
-    paddingVertical: 8,
+    paddingVertical: 4,
     paddingHorizontal: 12,
     alignItems: "center",
     width: "40%",
@@ -242,7 +214,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#000000",
+    color: "#fff",
   },
   winButton: {
     backgroundColor: "#4CAF50", // Green color
@@ -251,13 +223,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#F44336", // Red color
   },
   titleText: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "bold",
-    color: "#000000",
+    color: "#fff",
   },
   subText: {
     fontSize: 16,
-    color: "#000000",
+    color: "#fff",
     marginTop: 4,
   },
   modalContainer: {
