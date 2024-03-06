@@ -15,7 +15,7 @@ const Stack = createStackNavigator();
 const FeedStack = ({ game_id }) => {
   return (
     <Stack.Navigator initialRouteName="Matchmaking" screenOptions={{
-      headerShown: false, // This will hide the header globally for all screens
+      // headerShown: false, // This will hide the header globally for all screens
     }}>
       <Stack.Screen 
         name="Matchmaking" 
