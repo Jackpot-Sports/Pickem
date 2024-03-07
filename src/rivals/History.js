@@ -54,14 +54,13 @@ const History = ({navigation}) => {
     
   
     const renderItem = ({ item }) => {
-        // Assuming picks are stored as JSON strings; parse them
+        // Parse the picks JSON strings
         const picksA = JSON.parse(item.picks_a || '{}');
         const picksB = JSON.parse(item.picks_b || '{}');
       
-        // Convert picks objects to displayable strings
-        // This example simply joins the pick results, but you might want to format it differently
-        const displayPicksA = Object.entries(picksA).map(([key, value]) => `${key}: ${value}`).join(', ');
-        const displayPicksB = Object.entries(picksB).map(([key, value]) => `${key}: ${value}`).join(', ');
+        // Extract and format the prop information for display
+        const displayPicksA = Object.values(picksA).map(({result, prop}) => `${prop}: ${result}`).join('\n');
+        const displayPicksB = Object.values(picksB).map(({result, prop}) => `${prop}: ${result}`).join('\n');
       
         return (
           <TouchableOpacity
@@ -71,17 +70,17 @@ const History = ({navigation}) => {
               console.log('Selected game:', item);
             }}
           >
-            {/* Displaying pick information instead of just the game ID */}
-            <Text style={styles.title}>Picks A: {displayPicksA}</Text>
-            <Text style={styles.title}>Picks B: {displayPicksB}</Text>
+            <Text style={styles.title}>Picks A:</Text>
+            <Text>{displayPicksA}</Text>
+            <Text style={styles.title}>Picks B:</Text>
+            <Text>{displayPicksB}</Text>
           </TouchableOpacity>
         );
-      };
-      
+    };
+    
   
     return (
         <View>
-            <Text>uhhh</Text>
             <FlatList
                 data={games}
                 renderItem={renderItem}

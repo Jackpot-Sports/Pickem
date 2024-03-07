@@ -98,7 +98,7 @@ const Live =  () => {
   const handleResult = async (result, choice) => {
     // Assuming 'picks' is an array of objects and 'choice' is the UID you're matching
     const pickIndex = picks.findIndex(pick => pick.uid === choice);
-    let prop = ''; // Initialize prop outside the if block to make it accessible later
+    let prop = 'i'; // Initialize prop outside the if block to make it accessible later
   
     // Ensure we found a pick before proceeding
     if (pickIndex !== -1) {
@@ -106,7 +106,7 @@ const Live =  () => {
       const resultData = { choice, result }; // Assuming 'result' is defined elsewhere
   
       // Construct 'prop' using the pick object
-      prop = `${pick.key || ''}${pick.point || ''}${pick.descrip || ''}`;
+      prop = `${pick.description || ''} ${pick.key || ''} ${pick.point || ''}`;
       // Further actions using 'resultData' and 'prop'
     } else {
       console.log('Pick not found');
@@ -165,11 +165,11 @@ const Live =  () => {
     let picks_b = {};
 
     // Iterate through the choices and categorize them into picks_a or picks_b based on the player
-    Object.entries(choices).forEach(([choiceID, { player, result }]) => {
+    Object.entries(choices).forEach(([choiceID, { player, result,prop }]) => {
       if (player === "player_a") {
-        picks_a[choiceID] = result;
+        picks_a[choiceID] = { result, prop };
       } else if (player === "player_b") {
-        picks_b[choiceID] = result;
+        picks_b[choiceID] = { result, prop };
       }
     });
 
@@ -195,6 +195,7 @@ const Live =  () => {
   if (!phoneNumberValidated) {
     return (
       <View style={styles.container}>
+        <Text style={styles.titleText}>Put your number in</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter your phone number"
@@ -287,6 +288,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#212121"
   },
+  
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -330,7 +332,7 @@ const styles = StyleSheet.create({
     width: "80%",
     height: 40,
     backgroundColor: "#333", // Dark background for the text input
-    color: "#000000", // Text color
+    color: "#fff", // Text color
     paddingHorizontal: 10,
     marginBottom: 20,
     borderRadius: 5,
