@@ -116,7 +116,7 @@ export async function fetchRandomProps() {
       return []; // Return an empty array or handle the error as needed
     } else {
       const shuffledPicks = shuffleArray(data || []);
-      const randomPicks = shuffledPicks.slice(0, 3); // Select the first 3 picks
+      const randomPicks = shuffledPicks.slice(0, 5); // Select the first 3 picks
       return randomPicks; // Return the shuffled and sliced picks array
     }
   } catch (error) {
