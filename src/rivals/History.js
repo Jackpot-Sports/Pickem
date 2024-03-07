@@ -103,10 +103,10 @@ const History = () => {
   
   const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: "#121212",
-        alignItems: "center",
-      },
+      flexGrow: 1,
+      backgroundColor: "#121212",
+      alignItems: "center",
+    },
     item: {
       backgroundColor: '#f9c2ff',
       padding: 20,
