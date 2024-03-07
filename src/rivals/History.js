@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet,ScrollView } from 'react-native';
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -80,19 +80,24 @@ const History = ({navigation}) => {
     
   
     return (
-        <View>
+        <ScrollView contentContainerStyle={styles.container} >
             <FlatList
                 data={games}
                 renderItem={renderItem}
                 keyExtractor={item => item.game_id?.toString()}
             />
-        </View>
+        </ScrollView>
       
       
     );
   };
   
   const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#121212",
+        alignItems: "center",
+      },
     item: {
       backgroundColor: '#f9c2ff',
       padding: 20,

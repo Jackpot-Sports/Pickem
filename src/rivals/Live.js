@@ -7,6 +7,7 @@ import {
   Button,
   Alert,
   Text,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Share } from 'react-native';
@@ -25,7 +26,7 @@ const Live =  () => {
   const navigation = useNavigation();
   const [picks, setPicks] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState('player_a');
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("1234567890");
   const [phoneNumberValidated, setPhoneNumberValidated] = useState(false);
   const [choices, setChoices] = useState({});
   const [numPicks, setNumPicks] = useState(0);
@@ -95,7 +96,7 @@ const Live =  () => {
   // navigation.navigate('Matchmaking');
   // };
 
-  const handleResult = async (result, choice) => {
+  const handleSoloResult = async (result, choice) => {
     // Assuming 'picks' is an array of objects and 'choice' is the UID you're matching
     const pickIndex = picks.findIndex(pick => pick.uid === choice);
     let prop = 'i'; // Initialize prop outside the if block to make it accessible later
@@ -142,23 +143,23 @@ const Live =  () => {
     // You might want to update the game state in your backend here
   };
 
-  // const createNewGame = async (selectedPick, remainingPicks) => {
-  //   try {
-  //     // Update the picks_a column with the selected pick for the specified user
-  //     const { data: newGame, error: createGameError } = await supabase
-  //       .from("pre_rivals")
-  //       .insert([{player_a:phoneNumber, picks_a: selectedPick, un_picked: remainingPicks }])
-  //       .select();
+  const createNewGame = async (selectedPick, remainingPicks) => {
+    try {
+      // Update the picks_a column with the selected pick for the specified user
+      const { data: newGame, error: createGameError } = await supabase
+        .from("pre_rivals")
+        .insert([{player_a:phoneNumber, picks_a: selectedPick, un_picked: remainingPicks }])
+        .select();
 
-  //     if (createGameError) {
-  //       console.error("Error updating picks_a:", createGameError.message);
-  //       return;
-  //     }
-  //     setGameId(newGame[0].game_id);
-  //   } catch (error) {
-  //     console.error("Error:", error.message);
-  //   }
-  // };
+      if (createGameError) {
+        console.error("Error updating picks_a:", createGameError.message);
+        return;
+      }
+      setGameId(newGame[0].game_id);
+    } catch (error) {
+      console.error("Error:", error.message);
+    }
+  };
 
   const createNewGameRow = async () => {
     let picks_a = {};
@@ -208,7 +209,7 @@ const Live =  () => {
     );
   } else {
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} >
       <View style={{marginTop: 50}}>
         {picks.map((pick) => (
           <Card key={pick.uid} style={styles.commonCard}>
@@ -229,14 +230,14 @@ const Live =  () => {
                     <>
                       <TouchableOpacity
                         style={[styles.button, styles.winButton]}
-                        onPress={() => handleResult("Over", pick.uid)}
+                        onPress={() => handleSoloResult("Over", pick.uid)}
                       >
                         <Title style={styles.buttonText}>Over</Title>
                       </TouchableOpacity>
 
                       <TouchableOpacity
                         style={[styles.button, styles.loseButton]}
-                        onPress={() => handleResult("Under", pick.uid)}
+                        onPress={() => handleSoloResult("Under", pick.uid)}
                       >
                         <Title style={styles.buttonText}>Under</Title>
                       </TouchableOpacity>
@@ -246,14 +247,14 @@ const Live =  () => {
                     <>
                       <TouchableOpacity
                         style={[styles.button, styles.winButton]} // Consider changing the style if you want different colors for Yes/No
-                        onPress={() => handleResult("Yes", pick.uid)}
+                        onPress={() => handleSoloResult("Yes", pick.uid)}
                       >
                         <Title style={styles.buttonText}>Yes</Title>
                       </TouchableOpacity>
 
                       <TouchableOpacity
                         style={[styles.button, styles.loseButton]} // Consider changing the style if you want different colors for Yes/No
-                        onPress={() => handleResult("No", pick.uid)}
+                        onPress={() => handleSoloResult("No", pick.uid)}
                       >
                         <Title style={styles.buttonText}>No</Title>
                       </TouchableOpacity>
@@ -267,7 +268,7 @@ const Live =  () => {
 
       </View>
       
-    </View>
+    </ScrollView>
   );
         }
 };
