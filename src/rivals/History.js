@@ -26,7 +26,7 @@ const fetchGames = async (phoneNumber) => {
 
 const History = () => {
     const [games, setGames] = useState([]);
-    const [phoneNumber, setPhoneNumber] = useState("1234567890");
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [phoneNumberValidated, setPhoneNumberValidated] = useState(false);
 
 

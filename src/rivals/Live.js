@@ -27,7 +27,7 @@ const Live =  () => {
   const navigation = useNavigation();
   const [picks, setPicks] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState('player_a');
-  const [phoneNumber, setPhoneNumber] = useState("1234567890");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneNumberValidated, setPhoneNumberValidated] = useState(false);
   const [choices, setChoices] = useState({});
   const [numPicks, setNumPicks] = useState(0);
