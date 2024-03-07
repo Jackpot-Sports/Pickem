@@ -8,6 +8,7 @@ import {
   Alert,
   Text,
   ScrollView,
+  SafeAreaView
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Share } from 'react-native';
@@ -209,6 +210,7 @@ const Live =  () => {
     );
   } else {
   return (
+    <SafeAreaView style={{flex: 1, backgroundColor: "#121212",}}>
     <ScrollView contentContainerStyle={styles.container} >
       <View style={{marginTop: 50}}>
         {picks.map((pick) => (
@@ -267,8 +269,20 @@ const Live =  () => {
         ))}
 
       </View>
-      
+      <Text>
+        hejeheh
+      </Text>
+      <Text>
+        hejeheh
+      </Text>
+      <Text>
+        hejeheh
+      </Text>
+      <Text>
+        hejeheh
+      </Text>
     </ScrollView>
+    </SafeAreaView>
   );
         }
 };
@@ -277,9 +291,12 @@ export default Live;
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    // flexGrow: 1,
     backgroundColor: "#121212",
     alignItems: "center",
+    paddingBottom: 50,
+    height: '100vh', // Full viewport height
+    
   },
   commonCard: {
     borderRadius: 14,
