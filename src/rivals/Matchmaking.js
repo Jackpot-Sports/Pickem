@@ -73,9 +73,9 @@ const Matchmaking = ({ route }) => {
       <TouchableOpacity onPress={goToHistoryScreen} style={styles.button}>
         <Text style={styles.titleText}>History</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={goToGamesListScreen} style={styles.button}>
+      {/* <TouchableOpacity onPress={goToGamesListScreen} style={styles.button}>
         <Text style={styles.titleText}>AlexTest</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <Modal
         animationType="slide"
         transparent={true}

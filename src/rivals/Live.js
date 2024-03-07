@@ -180,7 +180,7 @@ const Live =  () => {
         .insert([{
           picks_a: JSON.stringify(picks_a),
           picks_b: JSON.stringify(picks_b),
-          phone: phoneNumber,
+          player_a: phoneNumber,
         }]);
 
       if (error) {
