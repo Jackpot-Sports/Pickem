@@ -25,7 +25,20 @@ export async function fetchRivals(userId) {
 
   return data;
 }
+export async function updatePlayerB(gameId, playerBId) {
+  const { data, error } = await supabase
+    .from('pre_rivals') // Assuming 'pre_rivals' is your table name
+    .update({ player_b: playerBId }) // Set the new player_b ID
+    .eq('game_id', gameId); // Where the game ID matches
 
+  if (error) {
+    console.error('Error updating player_b:', error.message);
+    return { success: false, error: error.message };
+  }
+
+  console.log('Updated player_b successfully:', data);
+  return { success: true, data };
+}
 export async function getCurrentUserId() {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();

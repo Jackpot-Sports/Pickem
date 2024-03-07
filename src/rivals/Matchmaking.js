@@ -3,18 +3,20 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { getCurrentUserId } from "../supabaseClient";
 import supabase from "../supabaseClient";
+import { useRoute } from '@react-navigation/native';
+const Matchmaking = () => {
+  const route = useRoute();
+  const game_id = route.params?.id;
 
-const Matchmaking = ({ route }) => {
-  const { game_id } = route.params;
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const goToLogin = () => {
-    navigation.navigate("Login");
+    navigation.navigate("Login", { game_id: game_id });
   };
 
   const goToLiveScreen = () => {
-    navigation.navigate('Live', { phone: '6788962515' });
+    navigation.navigate('Live');
   };
   const goToGamesListScreen = () => {
     navigation.navigate("GamesList");
@@ -43,7 +45,7 @@ const Matchmaking = ({ route }) => {
     if (game_id != null) {
       console.log(game_id)
       console.log("Valid Game ID exists, navigating to the game..."); // Create login screen thatll connect games
-      goToLiveScreen();
+      goToLogin();
     } else {
       console.log("No valid game ID, staying on Matchmaking screen.");
     }

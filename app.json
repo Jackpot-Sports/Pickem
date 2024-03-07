@@ -11,6 +11,12 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "scheme": "pickem",
+    "platforms": ["web", "ios", "android"],
+    "web": {
+      "deepLinking": true,
+      "favicon": "./assets/favicon.png"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -22,9 +28,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     }
   }
 }

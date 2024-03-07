@@ -33,7 +33,7 @@ const FeedStack = ({ game_id }) => {
 };
 
 const RivalsNav = ({ game_id = null }) => {
-  console.log("Step1");
+
   return (
     <View style={{ flex: 1 }}>
       <FeedStack game_id={game_id} /> 

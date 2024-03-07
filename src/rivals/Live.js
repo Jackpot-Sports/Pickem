@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Share } from 'react-native';
 import { Card, Title, Paragraph } from "react-native-paper";
 // import { supabase } from "../supabaseClient";
-
+import * as Sharing from 'expo-sharing';
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -55,6 +55,11 @@ const Live =  () => {
       Alert.alert("Error", "Please enter a valid phone number.");
     }
   };
+  function generateInviteLink(gameID) {
+    //http://localhost:8081/user/1231
+    const host = 'http://localhost:8081'; // Change this to your app's host URL
+    return `${host}/user/${gameID}`;
+  }
 
   // const handleResult = async (result, choice) => {
   //   const pickIndex = picks.findIndex((pick) => pick.uid === choice);
@@ -96,34 +101,39 @@ const Live =  () => {
   // };
 
   const handleResult = async (result, choice) => {
-    // Assuming 'picks' is an array of objects and 'choice' is the UID you're matching
     const pickIndex = picks.findIndex(pick => pick.uid === choice);
     let prop = 'i'; // Initialize prop outside the if block to make it accessible later
   
-    // Ensure we found a pick before proceeding
     if (pickIndex !== -1) {
-      const pick = picks[pickIndex]; // Get the pick object
-      const resultData = { choice, result }; // Assuming 'result' is defined elsewhere
-  
-      // Construct 'prop' using the pick object
+      const pick = picks[pickIndex];
+      const resultData = { choice, result };
       prop = `${pick.description || ''} ${pick.key || ''} ${pick.point || ''}`;
-      // Further actions using 'resultData' and 'prop'
     } else {
       console.log('Pick not found');
-      // Handle the case where the pick is not found
-      return; // Exit the function early if the pick is not found
+      return;
     }
   
-    // Now 'prop' is accessible here
-    // Update the choices state
     setChoices(prevChoices => ({
       ...prevChoices,
       [choice]: { player: currentPlayer, result, prop }
     }));
   
-    // Switch to the next player after logging the pick
-    setNumPicks((prevNumPicks) => prevNumPicks + 1);
+    setNumPicks(prevNumPicks => prevNumPicks + 1);
     setCurrentPlayer(currentPlayer === 'player_a' ? 'player_b' : 'player_a');
+
+    
+    const gameID= await createNewGame(resultData, [updatedPicks]);
+    const inviteLink = generateInviteLink(gameID); // Use the existing function to generate the link
+    try {
+      await Sharing.shareAsync(inviteLink, {
+        mimeType: 'text/plain', // Optional, depending on what you are sharing
+        dialogTitle: 'Share the game invite link with friends', // Optional, for Android
+      });
+      console.log('Invite link shared successfully.');
+    } catch (error) {
+      console.error('Error sharing invite link:', error);
+    }
+    navigation.navigate('Matchmaking');
   };
   
   

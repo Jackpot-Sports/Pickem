@@ -3,6 +3,8 @@ import {Alert, StyleSheet, View} from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import supabase from '../supabaseClient';
 import {Button, Input} from 'react-native-elements';
+import { updatePlayerB } from '../supabaseClient';
+import { useRoute } from '@react-navigation/native';
 
 export default function Login() {
   const [email, setEmail] = useState('dev@gmail.com');
@@ -10,7 +12,10 @@ export default function Login() {
   const [password, setPassword] = useState('tester');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
-
+  const route = useRoute();
+  const { game_id } = route.params;
+  const idPart = game_id.split("-")[1];
+  console.log("Game ID:", game_id);
   async function signInWithEmail() {
     setLoading(true);
     const {error} = await supabase.auth.signInWithPassword({
@@ -20,6 +25,7 @@ export default function Login() {
     if (error) Alert.alert(error.message);
     navigation.navigate("Matchmaking");
     setLoading(false);
+    linkWithGame(email)
   }
 
   async function signUpWithEmail() {
@@ -30,6 +36,7 @@ export default function Login() {
     });
     if (error) Alert.alert(error.message);
     setLoading(false);
+    linkWithGame(email)
   }
 
   async function signUpWithPhone() {
@@ -44,6 +51,16 @@ export default function Login() {
       phone: '+1'+phone,
       password: password,
     })
+  }
+  async function linkWithGame(identified) {
+    try {
+      const result = await updatePlayerB(idPart, identified);
+      console.log("Link with game successful:", result);
+      // Handle success, e.g., navigate to another screen or show a success message
+    } catch (error) {
+      console.error("Error linking with game:", error);
+      // Handle error, e.g., show an error message to the user
+    }
   }
   
 
