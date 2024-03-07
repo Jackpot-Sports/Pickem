@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet,ScrollView,TextInput,Button } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet,ScrollView,TextInput,Button,SafeAreaView } from 'react-native';
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -74,7 +74,7 @@ const History = () => {
     
     if (!phoneNumberValidated) {
       return (
-        <View style={styles.container}>
+        <View style={styles.textContainer}>
           <Text style={styles.titleText}>Put your number in</Text>
           <TextInput
             style={styles.input}
@@ -88,6 +88,8 @@ const History = () => {
       );
     } else {
     return (
+      <SafeAreaView style={{flex: 1, backgroundColor: "#121212",}}>
+    <ScrollView contentContainerStyle={styles.container} >
       <View style={styles.container}>
         <FlatList
             data={games}
@@ -95,8 +97,8 @@ const History = () => {
             keyExtractor={item => item.game_id?.toString()}
         />
       </View>
-      
-      
+      </ScrollView>
+      </SafeAreaView>
     );
     }
   };
@@ -106,6 +108,14 @@ const History = () => {
       flexGrow: 1,
       backgroundColor: "#121212",
       alignItems: "center",
+      height: '10vh',
+    },
+    textContainer: {
+      backgroundColor: "#121212",
+      alignItems: "center",
+      paddingBottom: 50,
+      height: '100vh', // Full viewport height
+      
     },
     item: {
       backgroundColor: '#f9c2ff',

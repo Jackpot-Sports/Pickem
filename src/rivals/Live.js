@@ -196,7 +196,7 @@ const Live =  () => {
   }
   if (!phoneNumberValidated) {
     return (
-      <View style={styles.container}>
+      <View style={styles.textContainer}>
         <Text style={styles.titleText}>Put your number in</Text>
         <TextInput
           style={styles.input}
@@ -269,18 +269,6 @@ const Live =  () => {
         ))}
 
       </View>
-      <Text>
-        hejeheh
-      </Text>
-      <Text>
-        hejeheh
-      </Text>
-      <Text>
-        hejeheh
-      </Text>
-      <Text>
-        hejeheh
-      </Text>
     </ScrollView>
     </SafeAreaView>
   );
@@ -291,7 +279,13 @@ export default Live;
 
 const styles = StyleSheet.create({
   container: {
-    // flexGrow: 1,
+    backgroundColor: "#121212",
+    alignItems: "center",
+    paddingBottom: 50,
+    height: '10vh', // Full viewport height
+    
+  },
+  textContainer: {
     backgroundColor: "#121212",
     alignItems: "center",
     paddingBottom: 50,
