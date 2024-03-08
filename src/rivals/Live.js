@@ -11,14 +11,14 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { Share } from 'react-native';
 import { Card, Title, Paragraph } from "react-native-paper";
-// import { supabase } from "../supabaseClient";
+import supabase  from "../supabaseClient";
 import * as Sharing from 'expo-sharing';
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  "https://aohggynmsqurtpszrgin.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvaGdneW5tc3F1cnRwc3pyZ2luIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTM1MDMyMzUsImV4cCI6MjAwOTA3OTIzNX0.wj2GWnQ6vsoph6Vs17GgLuBuuMt2tctCN9r1kIUCST4"
-);
+//const supabase = createClient(
+//  "https://aohggynmsqurtpszrgin.supabase.co",
+//  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvaGdneW5tc3F1cnRwc3pyZ2luIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTM1MDMyMzUsImV4cCI6MjAwOTA3OTIzNX0.wj2GWnQ6vsoph6Vs17GgLuBuuMt2tctCN9r1kIUCST4"
+//);
 import { fetchRandomProps } from "../supabaseClient";
 
 const Live =  () => {
@@ -29,12 +29,15 @@ const Live =  () => {
   const [phoneNumberValidated, setPhoneNumberValidated] = useState(false);
   const [choices, setChoices] = useState({});
   const [numPicks, setNumPicks] = useState(0);
-
+  const [user,setUser] = useState()
   useEffect(() => {
+
     const fetchProps = async () => {
-      const user = await fetchRandomProps(); // Assuming this returns an ID or null
-      // Assuming there's another function or logic here to fetch user details by userId
-      setPicks(user);
+      const props = await fetchRandomProps(); // Assuming this returns an ID or null
+      const { data: userResponse } = await supabase.auth.getUser();
+      const user = userResponse.user;
+      setUser(user)
+      setPicks(props);
     };
 
     fetchProps();
@@ -47,162 +50,92 @@ const Live =  () => {
 
   const handleSubmitPhoneNumber = () => {
     if (validatePhoneNumber(phoneNumber)) {
-      // If phone number is valid, update state and potentially perform other actions
       setPhoneNumberValidated(true);
-      // Alert.alert("Success", "Phone number accepted.");
     } else {
-      // If validation fails, keep the input visible and inform the user
       Alert.alert("Error", "Please enter a valid phone number.");
     }
   };
   function generateInviteLink(gameID) {
-    //http://localhost:8081/user/1231
-    const host = 'http://localhost:8081'; // Change this to your app's host URL
+    const host = 'http://localhost:8081';
     return `${host}/user/${gameID}`;
   }
 
-  // const handleResult = async (result, choice) => {
-  //   const pickIndex = picks.findIndex((pick) => pick.uid === choice);
-    
-  //   // Package choice and result into a JSON array
-  //   const resultData = {
-  //     choice,
-  //     result,
-  //   };
-  //   console.log(resultData)
-  //   const updatedPicks = [...picks];
-  //   // Check if the item was found
-  //   if (pickIndex !== -1) {
-  //     // Remove the item from the picks data
-
-  //     updatedPicks.splice(pickIndex, 1);
-  //     // Log the updated picks data and the resultData array
-  //   } else {
-  //     console.error(`Item with id ${uid} not found in picks data.`);
-  //   }
-  //   // if session
-  //   console.log("ASDSAd")
-  //   await createNewGame(resultData, [updatedPicks]);
-  //   try {
-  //   const shareResponse = await Share.share({
-  //     message: 'Check out this game!', // Your message or game details to share
-  //     // You can also specify a URL, title, etc.
-  //   });
-
-  //   if (shareResponse.action === Share.sharedAction) {
-  //     console.log('Game details shared.');
-  //   } else if (shareResponse.action === Share.dismissedAction) {
-  //     console.log('Share dialog dismissed.');
-  //   }
-  // } catch (error) {
-  //   console.error('Error sharing:', error.message);
-  // }
-  // navigation.navigate('Matchmaking');
-  // };
 
   const handleResult = async (result, choice) => {
-    const pickIndex = picks.findIndex(pick => pick.uid === choice);
-    let prop = 'i'; // Initialize prop outside the if block to make it accessible later
+    console.log("All picks:", picks); // Log all picks for debugging
+    console.log("Choice ID:", choice); // Log the choice ID being searched
   
-    if (pickIndex !== -1) {
-      const pick = picks[pickIndex];
-      const resultData = { choice, result };
-      prop = `${pick.description || ''} ${pick.key || ''} ${pick.point || ''}`;
+    const pickedItem = picks.find(pick => pick.uid === choice);
+    if (pickedItem) {
+      const { prop } = pickedItem;
+      setChoices({
+        [choice]: { result, prop }
+      });
+  
+      const gameID = await createNewGameRow(choice, result, prop);
+      if (gameID) {
+        const inviteLink = generateInviteLink(gameID);
+        try {
+          await Sharing.shareAsync(inviteLink, {
+            mimeType: 'text/plain',
+            dialogTitle: 'Share the game invite link with friends',
+          });
+          console.log('Invite link shared successfully.');
+        } catch (error) {
+          console.error('Error sharing invite link:', error);
+        }
+        navigation.navigate('Matchmaking');
+      }
     } else {
       console.log('Pick not found');
-      return;
     }
-  
-    setChoices(prevChoices => ({
-      ...prevChoices,
-      [choice]: { player: currentPlayer, result, prop }
-    }));
-  
-    setNumPicks(prevNumPicks => prevNumPicks + 1);
-    setCurrentPlayer(currentPlayer === 'player_a' ? 'player_b' : 'player_a');
-
-    
-    const gameID= await createNewGame(resultData, [updatedPicks]);
-    const inviteLink = generateInviteLink(gameID); // Use the existing function to generate the link
-    try {
-      await Sharing.shareAsync(inviteLink, {
-        mimeType: 'text/plain', // Optional, depending on what you are sharing
-        dialogTitle: 'Share the game invite link with friends', // Optional, for Android
-      });
-      console.log('Invite link shared successfully.');
-    } catch (error) {
-      console.error('Error sharing invite link:', error);
-    }
-    navigation.navigate('Matchmaking');
   };
   
   
-  useEffect(() => {
-    // Check if all 5 picks have been made
-    if (numPicks === 5) {
-      // Call function to create a new game row in the database
-      createNewGameRow();
-    }
-  }, [numPicks]);
+  
+  const createNewGameRow = async (choiceId, result, prop) => {
 
-  const logPick = async (pickData, player) => {
-    // Logic to log the pick for the current player
-    // This is a placeholder for the actual implementation, which depends on your backend
-    console.log(`Logging pick for ${player}:`, pickData);
-    // You might want to update the game state in your backend here
+    const unpickedPicks = picks.filter(pick => !choices.hasOwnProperty(pick.uid) && pick.uid !== choiceId);
+
+    // Create an array of IDs from the unpicked picks, excluding the choiceId
+    let unpickedIds = unpickedPicks.map(pick => pick.uid);
+
+  let insertData = {
+    picks_a: JSON.stringify({ [choiceId]: { result, prop } }),
+    un_picked: unpickedIds, // This is now an array of text (IDs), matching the expected format
+    phone: phoneNumber,
+    currentPlayer:"player_b"
+    // Your existing logic to include player_a...
   };
-
-  // const createNewGame = async (selectedPick, remainingPicks) => {
-  //   try {
-  //     // Update the picks_a column with the selected pick for the specified user
-  //     const { data: newGame, error: createGameError } = await supabase
-  //       .from("pre_rivals")
-  //       .insert([{player_a:phoneNumber, picks_a: selectedPick, un_picked: remainingPicks }])
-  //       .select();
-
-  //     if (createGameError) {
-  //       console.error("Error updating picks_a:", createGameError.message);
-  //       return;
-  //     }
-  //     setGameId(newGame[0].game_id);
-  //   } catch (error) {
-  //     console.error("Error:", error.message);
-  //   }
-  // };
-
-  const createNewGameRow = async () => {
-    let picks_a = {};
-    let picks_b = {};
-
-    // Iterate through the choices and categorize them into picks_a or picks_b based on the player
-    Object.entries(choices).forEach(([choiceID, { player, result,prop }]) => {
-      if (player === "player_a") {
-        picks_a[choiceID] = { result, prop };
-      } else if (player === "player_b") {
-        picks_b[choiceID] = { result, prop };
-      }
-    });
-
+  
+    if (user) {
+      console.log(user);
+      console.log(user.id)
+      insertData.player_a = user.id; // Assigning user.id if present
+    }
+  
+    console.log(insertData);
+  
     try {
       const { data, error } = await supabase
         .from('pre_rivals')
-        .insert([{
-          picks_a: JSON.stringify(picks_a),
-          picks_b: JSON.stringify(picks_b),
-          phone: phoneNumber,
-        }]);
-
+        .insert([insertData])
+        .select();
+      console.log(data, error);
       if (error) {
         console.error('Error inserting data:', error);
-        return;
+        return null;
       }
-
+      
       console.log('Success, inserted data:', data);
+      return data[0].game_id;
     } catch (error) {
       console.error('Unexpected error:', error);
+      return null;
     }
-  }
-  if (!phoneNumberValidated) {
+  };
+  
+  if (!user &&!phoneNumberValidated ) {
     return (
       <View style={styles.container}>
         <Text style={styles.titleText}>Put your number in</Text>

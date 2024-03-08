@@ -10,7 +10,8 @@ const Matchmaking = () => {
 
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
-
+  const [session, setSession] = useState(null);
+  
   const goToLogin = () => {
     navigation.navigate("Login", { game_id: game_id });
   };
@@ -30,25 +31,31 @@ const Matchmaking = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const { data, error } = supabase.auth.getSession();
-    setIsLoggedIn(!data);
-    const { data2: listener } = supabase.auth.onAuthStateChange((_event, data) => {
-      setIsLoggedIn(!!data);
+    supabase.auth.getSession().then(({data: {session}}) => {
+      setSession(session);
     });
 
-    return () => {
-      // listener.unsubscribe();
-    };
+    const {
+      data: {subscription},
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
+    
     if (game_id != null) {
       console.log(game_id)
       console.log("Valid Game ID exists, navigating to the game..."); // Create login screen thatll connect games
       goToLogin();
     } else {
+      if (!session)
+        goToLogin
       console.log("No valid game ID, staying on Matchmaking screen.");
     }
+
 }, [game_id, navigation]);
   return (
     <View style={styles.container}>

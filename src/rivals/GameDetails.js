@@ -1,51 +1,41 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, Alert, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from "react-native";
 import { Card, Title, Paragraph } from "react-native-paper";
-import { createClient } from "@supabase/supabase-js";
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { handleGameSelection } from '../supabaseClient'; // Adjust this import path as necessary
-
-
-const supabase = createClient(
-  "https://aohggynmsqurtpszrgin.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvaGdneW5tc3F1cnRwc3pyZ2luIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTM1MDMyMzUsImV4cCI6MjAwOTA3OTIzNX0.wj2GWnQ6vsoph6Vs17GgLuBuuMt2tctCN9r1kIUCST4"
-
-);
-
+import { useRoute } from '@react-navigation/native';
+import supabase from "../supabaseClient";
+import {getCurrentPlayerInGame,getUserIDOfPlayer} from "../supabaseClient"
 const GameDetails = () => {
   const [gameDetails, setGameDetails] = useState(null);
-  // Corrected: Define the state for unPickedGames
-  const [unPickedGames, setUnPickedGames] = useState([]);
+  const [unPickedBets, setUnPickedBets] = useState([]);
+  const [user,setUser] = useState()
   const route = useRoute();
   const { gameId } = route.params;
 
   useEffect(() => {
     const loadGameDetails = async () => {
+      const { data: userResponse } = await supabase.auth.getUser();
+      const user = userResponse.user;
+      setUser(user)
       if (!gameId) {
         Alert.alert("Error", "Game ID is required.");
         return;
       }
-  
+
       try {
         const { data, error } = await supabase
           .from("pre_rivals")
           .select("*")
           .eq("game_id", gameId)
           .single();
-  
+
         if (error) {
           console.error("Error fetching game details:", error.message);
           Alert.alert("Error", "Failed to load game details.");
         } else {
           setGameDetails(data);
+          // Assuming un_picked contains unpicked prop bet uids as an array
           if (data && data.un_picked) {
-            console.log("Raw un_picked data:", data.un_picked);
-            try {
-              const parsedUnPicked = data.un_picked[0].map(jsonStr => JSON.parse(jsonStr));
-              setUnPickedGames(parsedUnPicked);
-            } catch (parseError) {
-              console.error("Parsing error:", parseError);
-            }
+            loadUnpickedBets(data.un_picked);
           }
         }
       } catch (error) {
@@ -53,58 +43,107 @@ const GameDetails = () => {
         Alert.alert("Error", "An unexpected error occurred.");
       }
     };
-  
+
+    const loadUnpickedBets = async (unpickedUids) => {
+      try {
+        const { data, error } = await supabase
+          .from("prop_bets")
+          .select("*")
+          .in("uid", unpickedUids);
+
+        if (error) {
+          throw error;
+        }
+
+        setUnPickedBets(data);
+      } catch (error) {
+        console.error("Failed to load unpicked bets:", error.message);
+        Alert.alert("Error", "Failed to load unpicked bets.");
+      }
+    };
+
     loadGameDetails();
   }, [gameId]);
-  
 
-  const handleSelection = async (pickId, result) => {
-    const userId = "644ca2a0-6fe6-4792-a1d6-11ce3b9de8db"; 
-    const response = await handleGameSelection(gameDetails, pickId, result, userId);
-    console.log("Asdas")
-    if (response.success) {
-      navigation.goBack(); 
-    } else {
-      Alert.alert('Update Failed', response.error);
+  const handleSelection = async (choiceUid, result) => {
+    // Filter out the selected choiceUid from unPickedBets to get the updated list of unpicked bets
+    const updatedUnpickedIds = unPickedBets
+    .filter(bet => bet.uid !== choiceUid)
+    .map(bet => bet.uid);
+    const currentPlayerActiveData = await getCurrentPlayerInGame(gameId)
+    const currentActivePlayer = currentPlayerActiveData.data[0].currentPlayer
+    console.log("ASDASDSAD"+gameDetails[currentActivePlayer === 'player_a' ? 'picks_a' : 'picks_b'])
+    let updateData = {
+      // Update the currentPlayer's choice with the new result
+      // Assuming you need to maintain the structure of picks_a or picks_b based on the currentPlayer
+      [currentActivePlayer === 'player_a' ? 'picks_a' : 'picks_b']: JSON.stringify({ ...gameDetails[currentActivePlayer === 'player_a' ? 'picks_a' : 'picks_b'], [choiceUid]: { result } }),
+      un_picked: updatedUnpickedIds,
+      // Switch the currentPlayer
+      currentPlayer: currentActivePlayer === 'player_a' ? 'player_b' : 'player_a',
+    };
+    const nextUserID = await getUserIDOfPlayer(updateData.currentPlayer,gameId)
+    updateData.active_player = nextUserID.data[0].currentActivePlayer
+    
+    console.log("Updating with data:", updateData);
+  
+    try {
+      const { data, error } = await supabase
+        .from('pre_rivals')
+        .update(updateData)
+        .match({ game_id: gameId }); // Use the correct identifier to match the game row you're updating
+  
+      console.log("Update response:", { data, error });
+  
+      if (error) {
+        console.error('Error updating data:', error);
+        Alert.alert('Update Failed', error.message);
+        return null;
+      }
+  
+      console.log('Success, updated data:', data);
+      navigation.navigate('Matchmaking');
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      Alert.alert('Error', 'An unexpected error occurred.');
+      return null;
     }
   };
 
   if (!gameDetails) {
-    console.log(gameDetails)
     return (
-        <View style={styles.container}>
-            <Text>Loading game details...</Text>
-        </View>
+      <View style={styles.container}>
+        <Text>Loading game details...</Text>
+      </View>
     );
-}
+  }
 
-return (
+  return (
     <View style={styles.container}>
-        {/* Render game details here, assuming gameDetails is not null */}
-        <Text>Game ID: {gameDetails.game_id}</Text>
-        {unPickedGames.map((pick, index) => (
-            <Card key={index} style={styles.commonCard}>
-                <Card.Content>
-                    <Title style={styles.titleText}>{pick.home_team} vs {pick.away_team}</Title>
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity
-                            style={[styles.button, styles.winButton]}
-                            onPress={() => handleSelection(pick.id, 'Win')}>
-                            <Text style={styles.buttonText}>Win</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.button, styles.loseButton]}
-                            onPress={() => handleSelection(pick.id, 'Lose')}>
-                            <Text style={styles.buttonText}>Lose</Text>
-                        </TouchableOpacity>
-                    </View>
-                </Card.Content>
-            </Card>
-        ))}
-    </View>
-);
-};
+      <Text>Game ID: {gameDetails.game_id}</Text>
+      {unPickedBets.map((bet, index) => (
+        <Card key={index} style={styles.commonCard}>
+          <Card.Content>
+            <Title style={styles.titleText}>{bet.description}</Title>
+            <Paragraph>Point: {bet.point}</Paragraph>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.button, styles.winButton]}
+                onPress={() => handleSelection(bet.uid, 'Win')}>
+                <Text style={styles.buttonText}>Win</Text>
+              </TouchableOpacity>
 
+              <TouchableOpacity
+                style={[styles.button, styles.loseButton]}
+                onPress={() => handleSelection(bet.uid, 'Lose')}>
+                <Text style={styles.buttonText}>Lose</Text>
+              </TouchableOpacity>
+            </View>
+          </Card.Content>
+        </Card>
+      ))}
+    </View>
+  );
+};
 export default GameDetails;
 
 const styles = StyleSheet.create({
@@ -116,19 +155,20 @@ const styles = StyleSheet.create({
   commonCard: {
     borderRadius: 14,
     borderWidth: 1,
-    marginTop: 10,
-    padding: 10,
+    padding: 5,
     marginBottom: 10,
     flexDirection: "column",
+    backgroundColor: "#212121"
   },
+  
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginTop: 10,
+    marginTop: 5,
   },
   button: {
     borderRadius: 8,
-    paddingVertical: 8,
+    paddingVertical: 4,
     paddingHorizontal: 12,
     alignItems: "center",
     width: "40%",
@@ -145,7 +185,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F44336", // Red color
   },
   titleText: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
   },
@@ -168,24 +208,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 20,
     borderRadius: 5,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: "#121212",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  commonCard: {
-    borderRadius: 14,
-    borderWidth: 1,
-    marginTop: 10,
-    padding: 10,
-    marginBottom: 10,
-    flexDirection: "column",
-  },
-  titleText: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#fff",
   },
 });

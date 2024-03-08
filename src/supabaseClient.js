@@ -25,10 +25,35 @@ export async function fetchRivals(userId) {
 
   return data;
 }
+export async function getCurrentPlayerInGame(game_id){
+  const {data,error } = await supabase.from('pre_rivals')
+  .select('currentPlayer')
+  .eq('game_id',game_id)
+  if (error) {
+    console.error('Error getting player:', error.message);
+    return { success: false, error: error.message };
+  }
+
+  console.log('Got player successfully:', data);
+  return { success: true, data };
+}
+export async function getUserIDOfPlayer(currentPlayer,game_id)
+{
+  const {data,error } = await supabase.from('pre_rivals')
+  .select(currentPlayer)
+  .eq('game_id',game_id)
+  if (error) {
+    console.error('Error getting player:', error.message);
+    return { success: false, error: error.message };
+  }
+
+  console.log('Got player successfully:', data);
+  return { success: true, data };
+}
 export async function updatePlayerB(gameId, playerBId) {
   const { data, error } = await supabase
     .from('pre_rivals') // Assuming 'pre_rivals' is your table name
-    .update({ player_b: playerBId }) // Set the new player_b ID
+    .update({ player_b: playerBId,active_player: playerBId,currentPlayer:"player_b" }) // Set the new player_b ID
     .eq('game_id', gameId); // Where the game ID matches
 
   if (error) {
@@ -170,7 +195,8 @@ export const handleGameSelection = async (gameDetails, pickId, result, userId) =
 
 export async function getActivePlayerGames() {
   try {
-    const currentUserId = await getCurrentUserId();
+    const { data: userResponse } = await supabase.auth.getUser();
+    const currentUserId = userResponse.user.id;
     if (!currentUserId) {
       console.error('No current user ID found.');
       return [];

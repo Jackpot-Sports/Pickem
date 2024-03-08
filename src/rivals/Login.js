@@ -14,8 +14,8 @@ export default function Login() {
   const navigation = useNavigation();
   const route = useRoute();
   const { game_id } = route.params;
-  const idPart = game_id.split("-")[1];
-  console.log("Game ID:", game_id);
+  const idPart = game_id.slice(5);
+  console.log("Game ID:", idPart);
   async function signInWithEmail() {
     setLoading(true);
     const {error} = await supabase.auth.signInWithPassword({
@@ -54,7 +54,9 @@ export default function Login() {
   }
   async function linkWithGame(identified) {
     try {
-      const result = await updatePlayerB(idPart, identified);
+      const { data: userResponse } = await supabase.auth.getUser();
+      const user = userResponse.user;
+      const result = await updatePlayerB(idPart, user.id);
       console.log("Link with game successful:", result);
       // Handle success, e.g., navigate to another screen or show a success message
     } catch (error) {

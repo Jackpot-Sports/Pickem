@@ -7,23 +7,24 @@ const GamesList = ({ navigation }) => {
   const [loadingError, setLoadingError] = useState(false);
 
   useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        const gamesData = await getActivePlayerGames();
+        console.log(gamesData)
+        if (gamesData.length === 0) {
+          setLoadingError(true);
+        } else {
+          setGames(gamesData);
+          setLoadingError(false);
+        }
+      } catch (error) {
+        console.error('Error fetching games:', error);
+        setLoadingError(true);
+      }
+    };
+  
     fetchGames();
   }, []);
-
-  const fetchGames = async () => {
-    try {
-      const gamesData = await getActivePlayerGames();
-      if (gamesData.length === 0) {
-        setLoadingError(true);
-      } else {
-        setGames(gamesData);
-        setLoadingError(false);
-      }
-    } catch (error) {
-      console.error('Error fetching games:', error);
-      setLoadingError(true);
-    }
-  };
   const goGame= (item)=>{
     console.log(item.game_id)
     navigation.navigate('GameDetails', { gameId: item.game_id })
