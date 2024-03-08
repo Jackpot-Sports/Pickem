@@ -19,7 +19,7 @@ import { createClient } from "@supabase/supabase-js";
 //  "https://aohggynmsqurtpszrgin.supabase.co",
 //  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvaGdneW5tc3F1cnRwc3pyZ2luIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTM1MDMyMzUsImV4cCI6MjAwOTA3OTIzNX0.wj2GWnQ6vsoph6Vs17GgLuBuuMt2tctCN9r1kIUCST4"
 //);
-import { fetchRandomProps } from "../supabaseClient";
+import { fetchMMAProps } from "../supabaseClient";
 
 const Live =  () => {
   const navigation = useNavigation();
@@ -33,7 +33,7 @@ const Live =  () => {
   useEffect(() => {
 
     const fetchProps = async () => {
-      const props = await fetchRandomProps(); // Assuming this returns an ID or null
+      const props = await fetchMMAProps(); // Assuming this returns an ID or null
       const { data: userResponse } = await supabase.auth.getUser();
       const user = userResponse.user;
       setUser(user)
@@ -157,10 +157,10 @@ const Live =  () => {
           <Card key={pick.uid} style={styles.commonCard}>
             <Card.Content>
               <Title style={styles.titleText}>
-                {pick.description}
+                {pick.home} vs {pick.away}
               </Title >
               {/* Additional details */}
-              <Paragraph style={styles.subText}> {pick.key} {pick.point}</Paragraph>
+              <Paragraph style={styles.subText}> {pick.category} {pick.point}</Paragraph>
 
               {choices[pick.uid] ? (
                 // If the pick has been chosen, display who chose it and their choice
@@ -189,16 +189,16 @@ const Live =  () => {
                     <>
                       <TouchableOpacity
                         style={[styles.button, styles.winButton]} // Consider changing the style if you want different colors for Yes/No
-                        onPress={() => handleResult("Yes", pick.uid)}
+                        onPress={() => handleResult(pick.home, pick.uid)}
                       >
-                        <Title style={styles.buttonText}>Yes</Title>
+                        <Title style={styles.buttonText}>{pick.home}</Title>
                       </TouchableOpacity>
 
                       <TouchableOpacity
                         style={[styles.button, styles.loseButton]} // Consider changing the style if you want different colors for Yes/No
-                        onPress={() => handleResult("No", pick.uid)}
+                        onPress={() => handleResult(pick.away, pick.uid)}
                       >
-                        <Title style={styles.buttonText}>No</Title>
+                        <Title style={styles.buttonText}>{pick.away}</Title>
                       </TouchableOpacity>
                     </>
                   )} 

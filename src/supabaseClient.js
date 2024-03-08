@@ -163,6 +163,34 @@ export async function fetchRandomProps() {
   }
 }
 
+export async function fetchMMAProps() {
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+
+  try {
+    const { data, error } = await supabase
+      .from("ufc_events")
+      .select("*");
+
+    if (error) {
+      console.error("Error fetching picks:", error.message);
+      return []; // Return an empty array or handle the error as needed
+    } else {
+      const shuffledPicks = shuffleArray(data || []);
+      const randomPicks = shuffledPicks.slice(0, 5); // Select the first 3 picks
+      return randomPicks; // Return the shuffled and sliced picks array
+    }
+  } catch (error) {
+    console.error("Error:", error.message);
+    return []; // Return an empty array or handle the error as needed
+  }
+}
+
 export const handleGameSelection = async (gameDetails, pickId, result, userId) => {
   // Parsing the nested un_picked array correctly
   const parsedUnPicked = JSON.parse(gameDetails.un_picked[0]);
