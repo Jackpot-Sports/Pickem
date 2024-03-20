@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet,ScrollView,TextInput,Button,SafeAreaView } from 'react-native';
+import { ProgressBar, MD3Colors } from 'react-native-paper';
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -22,12 +23,61 @@ const fetchGames = async (phoneNumber) => {
   return games;
 };
 
+const fetchBetDetails = async (uid) => {
+  let { data: betDetails, error } = await supabase
+    .from('prop_bets')
+    .select('final')
+    .eq('uid', uid);
+
+  if (error) {
+    console.error('Error fetching bet details:', error);
+    return null;
+  }
+
+  return betDetails.length > 0 ? betDetails[0] : null;
+};
+
+const enhanceGamesWithBets = async (games) => {
+  for (const game of games) {
+    const picksA = JSON.parse(game.picks_a || '{}');
+    const picksB = JSON.parse(game.picks_b || '{}');
+
+    for (const uid of Object.keys(picksA)) {
+      const betDetails = await fetchBetDetails(uid);
+      // Add a new property for the actual result, to compare with the prediction
+      picksA[uid].actualResult = betDetails ? betDetails.final : '';
+    }
+
+    for (const uid of Object.keys(picksB)) {
+      const betDetails = await fetchBetDetails(uid);
+      // Add a new property for the actual result, to compare with the prediction
+      picksB[uid].actualResult = betDetails ? betDetails.final : '';
+    }
+
+    game.picks_a = picksA;
+    game.picks_b = picksB;
+  }
+  return games;
+};
+
   
 
 const History = () => {
     const [games, setGames] = useState([]);
-    const [phoneNumber, setPhoneNumber] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("6788962515");
     const [phoneNumberValidated, setPhoneNumberValidated] = useState(false);
+
+    useEffect(() => {
+      const loadData = async () => {
+        if (phoneNumberValidated) {
+          const fetchedGames = await fetchGames(phoneNumber);
+          const enhancedGames = await enhanceGamesWithBets(fetchedGames);
+          setGames(enhancedGames);
+        }
+      };
+  
+      loadData();
+    }, [phoneNumberValidated, phoneNumber]);
 
 
     const validatePhoneNumber = (number) => {
@@ -44,34 +94,32 @@ const History = () => {
         Alert.alert("Error", "Please enter a valid phone number.");
       }
     };
-
-    
-  
     const renderItem = ({ item }) => {
-        // Parse the picks JSON strings
-        const picksA = JSON.parse(item.picks_a || '{}');
-        const picksB = JSON.parse(item.picks_b || '{}');
-      
-        // Extract and format the prop information for display
-        const displayPicksA = Object.values(picksA).map(({result, prop}) => `${prop}: ${result}`).join('\n');
-        const displayPicksB = Object.values(picksB).map(({result, prop}) => `${prop}: ${result}`).join('\n');
-      
-        return (
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => {
-              // Placeholder for any action you want to take when an item is pressed
-              console.log('Selected game:', item);
-            }}
-          >
-            <Text style={styles.title}>Picks A:</Text>
-            <Text>{displayPicksA}</Text>
-            <Text style={styles.title}>Picks B:</Text>
-            <Text>{displayPicksB}</Text>
-          </TouchableOpacity>
-        );
-    };
+      const displayPicksA = Object.values(item.picks_a).map(({ result, prop }) => `${prop}: ${result}`).join('\n');
+      const displayPicksB = Object.values(item.picks_b).map(({ result, prop }) => `${prop}: ${result}`).join('\n');
     
+      // Example values for progress calculation
+      const allPicks = { ...item.picks_a, ...item.picks_b };
+
+      const totalPicks = Object.keys(allPicks).length; // Total number of picks from both A and B
+      const correctPicks = Object.values(allPicks).reduce((count, { result, actualResult }) => {
+        console.log(result, actualResult); // Log to verify the results
+        console.log(count);
+        return count + (result === actualResult ? 1 : 0); // Increment count if pick is correct
+      }, 0);
+
+      
+      return (
+        <TouchableOpacity style={styles.item} onPress={() => console.log('Selected game:', item)}>
+          <Text style={styles.title}>Picks A:</Text>
+          <Text>{displayPicksA}</Text>
+          <Text style={styles.title}>Picks B:</Text>
+          <Text>{displayPicksB}</Text>
+          <ProgressBar progress={correctPicks/totalPicks} color={MD3Colors.error50} />
+        </TouchableOpacity>
+      );
+    };
+        
     if (!phoneNumberValidated) {
       return (
         <View style={styles.textContainer}>
@@ -89,15 +137,15 @@ const History = () => {
     } else {
     return (
       <SafeAreaView style={{flex: 1, backgroundColor: "#121212",}}>
-    <ScrollView contentContainerStyle={styles.container} >
-      <View style={styles.container}>
-        <FlatList
-            data={games}
-            renderItem={renderItem}
-            keyExtractor={item => item.game_id?.toString()}
-        />
-      </View>
-      </ScrollView>
+        <ScrollView contentContainerStyle={styles.container} >
+          <View style={styles.container}>
+            <FlatList
+                data={games}
+                renderItem={renderItem}
+                keyExtractor={item => item.game_id?.toString()}
+            />
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
     }
