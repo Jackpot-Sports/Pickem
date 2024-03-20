@@ -102,11 +102,20 @@ const History = () => {
       const allPicks = { ...item.picks_a, ...item.picks_b };
 
       const totalPicks = Object.keys(allPicks).length; // Total number of picks from both A and B
-      const correctPicks = Object.values(allPicks).reduce((count, { result, actualResult }) => {
+      const correctPicksA = Object.values(item.picks_a).reduce((count, { result, actualResult }) => {
         console.log(result, actualResult); // Log to verify the results
-        console.log(count);
-        return count + (result === actualResult ? 1 : 0); // Increment count if pick is correct
+        return count + (result === actualResult ? 1 : 0); // Increment count if pick is correct for A
       }, 0);
+    
+      const correctPicksB = Object.values(item.picks_b).reduce((count, { result, actualResult }) => {
+        console.log(result, actualResult); // Log to verify the results
+        return count + (result !== actualResult ? 1 : 0); // Increment count if pick is opposite for B
+      }, 0);
+    
+      const correctPicks = correctPicksA + correctPicksB;
+      const progress = correctPicks / totalPicks;
+      const progressBarColor = progress > 0.5 ? MD3Colors.success50 : MD3Colors.error50;
+
 
       
       return (
@@ -115,7 +124,7 @@ const History = () => {
           <Text>{displayPicksA}</Text>
           <Text style={styles.title}>Picks B:</Text>
           <Text>{displayPicksB}</Text>
-          <ProgressBar progress={correctPicks/totalPicks} color={MD3Colors.error50} />
+          <ProgressBar progress={progress} color={progressBarColor} />
         </TouchableOpacity>
       );
     };
