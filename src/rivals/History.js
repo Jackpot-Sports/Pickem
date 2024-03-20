@@ -120,10 +120,10 @@ const History = () => {
       
       return (
         <TouchableOpacity style={styles.item} onPress={() => console.log('Selected game:', item)}>
-          <Text style={styles.title}>Picks A:</Text>
-          <Text>{displayPicksA}</Text>
-          <Text style={styles.title}>Picks B:</Text>
-          <Text>{displayPicksB}</Text>
+          <Text style={styles.titleText}>Picks A:</Text>
+          <Text style={styles.subText}>{displayPicksA}</Text>
+          <Text style={styles.titleText}>Picks B:</Text>
+          <Text style={styles.subText}>{displayPicksB}</Text>
           <ProgressBar progress={progress} color={progressBarColor} />
         </TouchableOpacity>
       );
@@ -175,7 +175,7 @@ const History = () => {
       
     },
     item: {
-      backgroundColor: '#f9c2ff',
+      backgroundColor: '#646667',
       padding: 20,
       marginVertical: 8,
       marginHorizontal: 16,
