@@ -58,8 +58,8 @@ const Live =  () => {
     }
   };
 function generateInviteLink(gameID) {
-  // const host = 'http://pickems.netlify.app';
-  const host = 'http://localhost:8081'
+  const host = 'http://pickems.netlify.app';
+  //const host = 'http://localhost:8081'
   // Use query parameters for the game ID
   return `${host}/?gameID=${gameID}`;
 }

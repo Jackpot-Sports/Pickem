@@ -12,8 +12,6 @@ export default function App() {
       config: {
         screens: {
           Home: 'home',
-          matchmaking:"Matchmaking",
-          Matchmaking: "Matchmaking",
           Matchmaking: '*', // Catch-all route for unmatched paths
         },
       },
