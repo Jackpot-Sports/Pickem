@@ -12,7 +12,7 @@ export default function App() {
       config: {
         screens: {
           Home: 'home',
-          Matchmaking: "match",
+          Matchmaking: "matchmaking",
           NotFound: '*', // Catch-all route for unmatched paths
         },
       },
