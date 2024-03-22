@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Linking } from "react-native";
 import { Card, Title, Paragraph } from "react-native-paper";
 import { useRoute } from '@react-navigation/native';
 import supabase from "../supabaseClient";
@@ -114,7 +114,9 @@ const loadUnpickedBets = async (unpickedIds) => {
     }
 
     console.log('Success, updated data:', data);
-    navigation.navigate('Matchmaking');
+    // navigation.navigate('Matchmaking');
+    const url = 'https://pickems.netlify.app'
+    await Linking.openURL(url)
   } catch (error) {
     console.error('Unexpected error:', error);
     Alert.alert('Error', 'An unexpected error occurred.');
