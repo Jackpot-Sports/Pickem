@@ -8,12 +8,13 @@ import Auth from "./src/rivals/Auth";
 
 export default function App() {
     const linking = {
-      prefixes: ['https://yourapp.com', 'yourapp://','http://localhost:8081/'],
+      prefixes: ['https://pickems.netlify.app/', 'yourapp://','http://localhost:8081/'],
       config: {
         screens: {
           Home: 'home',
-          Matchmaking: "matchmaking",
-          NotFound: '*', // Catch-all route for unmatched paths
+          matchmaking:"Matchmaking",
+          Matchmaking: "Matchmaking",
+          Matchmaking: '*', // Catch-all route for unmatched paths
         },
       },
     };
