@@ -114,7 +114,7 @@ const loadUnpickedBets = async (unpickedIds) => {
     }
 
     console.log('Success, updated data:', data);
-    navigation.navigate('Matchmaking');
+    navigation.navigate('SomeNonExistentRoute');
   } catch (error) {
     console.error('Unexpected error:', error);
     Alert.alert('Error', 'An unexpected error occurred.');
