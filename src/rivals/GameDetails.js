@@ -114,9 +114,7 @@ const loadUnpickedBets = async (unpickedIds) => {
     }
 
     console.log('Success, updated data:', data);
-    // navigation.navigate('Matchmaking');
-    const url = 'https://pickems.netlify.app'
-    await Linking.openURL(url)
+    navigation.navigate('SomeNonExistentRoute');
   } catch (error) {
     console.error('Unexpected error:', error);
     Alert.alert('Error', 'An unexpected error occurred.');
