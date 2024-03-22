@@ -51,6 +51,8 @@ export async function getUserIDOfPlayer(currentPlayer,game_id)
   return { success: true, data };
 }
 export async function updatePlayerB(gameId, playerBId) {
+  console.log("ASDASDASD")
+  console.log("Alex:" + playerBId)
   const { data, error } = await supabase
     .from('pre_rivals') // Assuming 'pre_rivals' is your table name
     .update({ player_b: playerBId,active_player: playerBId,currentPlayer:"player_b" }) // Set the new player_b ID

@@ -11,11 +11,14 @@ export default function Login() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('tester');
   const [loading, setLoading] = useState(false);
+  const [userID, setUserID] = useState()
   const navigation = useNavigation();
   const route = useRoute();
   const { game_id } = route.params;
-  const idPart = game_id.slice(5);
-  console.log("Game ID:", idPart);
+
+  console.log("Game ID:", game_id);
+
+
   async function signInWithEmail() {
     setLoading(true);
     const {error} = await supabase.auth.signInWithPassword({
@@ -24,8 +27,9 @@ export default function Login() {
     });
     if (error) Alert.alert(error.message);
     navigation.navigate("Matchmaking");
+    createUser()
     setLoading(false);
-    linkWithGame(email)
+    
   }
 
   async function signUpWithEmail() {
@@ -35,8 +39,21 @@ export default function Login() {
       password: password,
     });
     if (error) Alert.alert(error.message);
+    createUser()
     setLoading(false);
-    linkWithGame(email)
+    
+    
+  }
+  async function createUser(){
+    const { data: userResponse, error } = await supabase.auth.getUser();
+    if (error) throw new Error("Failed to fetch user: " + error.message);
+  
+    const user = userResponse.user;
+    if (!user) throw new Error("No user logged in");
+    setUserID(user.id)
+    console.log("USERID: "+ userID)
+    console.log("EEEE:"+ user.id)
+    linkWithGame(user.id) 
   }
 
   async function signUpWithPhone() {
@@ -52,16 +69,13 @@ export default function Login() {
       password: password,
     })
   }
-  async function linkWithGame(identified) {
+  async function linkWithGame(testID) {
     try {
-      const { data: userResponse } = await supabase.auth.getUser();
-      const user = userResponse.user;
-      const result = await updatePlayerB(idPart, user.id);
+      console.log("Attempting to link game with gameID and userID:", game_id, testID);
+      const result = await updatePlayerB(game_id, testID);
       console.log("Link with game successful:", result);
-      // Handle success, e.g., navigate to another screen or show a success message
     } catch (error) {
       console.error("Error linking with game:", error);
-      // Handle error, e.g., show an error message to the user
     }
   }
   

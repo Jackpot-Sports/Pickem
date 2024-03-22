@@ -12,15 +12,7 @@ export default function App() {
       config: {
         screens: {
           Home: 'home',
-          Matchmaking: {
-            path: 'user/:id/:section?',
-            parse: {
-              id: (id) => `user-${id}`,
-            },
-            stringify: {
-              id: (id) => id.replace(/^user-/, ''),
-            },
-          },
+          Matchmaking: "match",
           NotFound: '*', // Catch-all route for unmatched paths
         },
       },

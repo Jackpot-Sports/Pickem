@@ -57,17 +57,19 @@ const Live =  () => {
       Alert.alert("Error", "Please enter a valid phone number.");
     }
   };
-  function generateInviteLink(gameID) {
-    const host = 'http://pickems.netlify.app';
-    return `${host}/user/${gameID}`;
-  }
+function generateInviteLink(gameID) {
+  //const host = 'http://pickems.netlify.app';
+  const host = 'http://localhost:8081'
+  // Use query parameters for the game ID
+  return `${host}/?gameID=${gameID}`;
+}
 
 
   const handleResult = async (result, choice) => {
     console.log("All picks:", picks); // Log all picks for debugging
     console.log("Choice ID:", choice); // Log the choice ID being searched
   
-    const pickedItem = picks.find(pick => pick.uid === choice);
+    const pickedItem = picks.find(pick => pick.id === choice);
     if (pickedItem) {
       const { prop } = pickedItem;
       setChoices({
@@ -97,10 +99,10 @@ const Live =  () => {
   
   const createNewGameRow = async (choiceId, result, prop) => {
 
-    const unpickedPicks = picks.filter(pick => !choices.hasOwnProperty(pick.uid) && pick.uid !== choiceId);
+    const unpickedPicks = picks.filter(pick => !choices.hasOwnProperty(pick.id) && pick.id !== choiceId);
 
     // Create an array of IDs from the unpicked picks, excluding the choiceId
-    let unpickedIds = unpickedPicks.map(pick => pick.uid);
+    let unpickedIds = unpickedPicks.map(pick => pick.id);
 
   let insertData = {
     picks_a: JSON.stringify({ [choiceId]: { result, prop } }),
@@ -158,7 +160,7 @@ const Live =  () => {
     <View style={styles.container}>
       <View style={{marginTop: 50}}>
         {picks.map((pick) => (
-          <Card key={pick.uid} style={styles.commonCard}>
+          <Card key={pick.id} style={styles.commonCard}>
             <Card.Content>
               <Title style={styles.titleText}>
                 {pick.home} vs {pick.away}
@@ -166,9 +168,9 @@ const Live =  () => {
               {/* Additional details */}
               <Paragraph style={styles.subText}> {pick.category} {pick.point}</Paragraph>
 
-              {choices[pick.uid] ? (
+              {choices[pick.id] ? (
                 // If the pick has been chosen, display who chose it and their choice
-                <Text style={styles.subText}>{choices[pick.uid].player} chose {choices[pick.uid].result}</Text>
+                <Text style={styles.subText}>{choices[pick.id].player} chose {choices[pick.id].result}</Text>
               ) : (
                 <View style={styles.buttonContainer}>
                   {pick.point ? (
@@ -176,14 +178,14 @@ const Live =  () => {
                     <>
                       <TouchableOpacity
                         style={[styles.button, styles.winButton]}
-                        onPress={() => handleResult("Over", pick.uid)}
+                        onPress={() => handleResult("Over", pick.id)}
                       >
                         <Title style={styles.buttonText}>Over</Title>
                       </TouchableOpacity>
 
                       <TouchableOpacity
                         style={[styles.button, styles.loseButton]}
-                        onPress={() => handleResult("Under", pick.uid)}
+                        onPress={() => handleResult("Under", pick.id)}
                       >
                         <Title style={styles.buttonText}>Under</Title>
                       </TouchableOpacity>
@@ -193,14 +195,14 @@ const Live =  () => {
                     <>
                       <TouchableOpacity
                         style={[styles.button, styles.winButton]} // Consider changing the style if you want different colors for Yes/No
-                        onPress={() => handleResult(pick.home, pick.uid)}
+                        onPress={() => handleResult(pick.home, pick.id)}
                       >
                         <Title style={styles.buttonText}>{pick.home}</Title>
                       </TouchableOpacity>
 
                       <TouchableOpacity
                         style={[styles.button, styles.loseButton]} // Consider changing the style if you want different colors for Yes/No
-                        onPress={() => handleResult(pick.away, pick.uid)}
+                        onPress={() => handleResult(pick.away, pick.id)}
                       >
                         <Title style={styles.buttonText}>{pick.away}</Title>
                       </TouchableOpacity>

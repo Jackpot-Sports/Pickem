@@ -1,19 +1,44 @@
 import React, { useState , useEffect } from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { Modal, View, Text, TouchableOpacity, StyleSheet,Linking } from "react-native";
+import { useNavigation   } from "@react-navigation/native";
 import { getCurrentUserId } from "../supabaseClient";
 import supabase from "../supabaseClient";
 import { useRoute } from '@react-navigation/native';
-const Matchmaking = () => {
-  const route = useRoute();
-  const game_id = route.params?.id;
+//http://localhost:8081/?gameID=9be02f17-b5bf-40b0-93d1-158da2482e3e
 
+const Matchmaking = () => {
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [session, setSession] = useState(null);
-  
+  const [gameID, setGameID] = useState(null); // Initialize state to hold the gameID
+
+  useEffect(() => {
+    const handleDeepLink = (event) => {
+      const url = new URL(event.url);
+      const queryParams = new URLSearchParams(url.search);
+      const extractedGameID = queryParams.get('gameID');
+      if (extractedGameID) {
+        setGameID(extractedGameID); // Set the gameID state
+        console.log("Extracted gameID:", extractedGameID);
+        // Here you can add logic based on the extracted gameID if needed
+      }
+    };
+
+    // Subscribe to incoming links
+    Linking.addEventListener('url', handleDeepLink);
+
+    // Check if the app was launched from a link and handle it
+    Linking.getInitialURL().then((initialUrl) => {
+      if (initialUrl) handleDeepLink({ url: initialUrl });
+    }).catch(err => console.error('An error occurred while fetching the initial URL:', err));
+
+    // Cleanup
+    return () => {
+      Linking.removeEventListener('url', handleDeepLink);
+    };
+  }, []);
   const goToLogin = () => {
-    navigation.navigate("Login", { game_id: game_id });
+    navigation.navigate("Login", { game_id: gameID });
   };
 
   const goToLiveScreen = () => {
@@ -46,8 +71,8 @@ const Matchmaking = () => {
 
   useEffect(() => {
     
-    if (game_id != null) {
-      console.log(game_id)
+    if (gameID != null) {
+      console.log(gameID)
       console.log("Valid Game ID exists, navigating to the game..."); // Create login screen thatll connect games
       goToLogin();
     } else {
@@ -56,7 +81,7 @@ const Matchmaking = () => {
       console.log("No valid game ID, staying on Matchmaking screen.");
     }
 
-}, [game_id, navigation]);
+}, [gameID, navigation]);
   return (
     <View style={styles.container}>
       <Text style={[styles.titleText, { color: "#fff" }]}>Pitch</Text>
